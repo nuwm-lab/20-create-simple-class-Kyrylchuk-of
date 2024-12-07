@@ -1,105 +1,73 @@
 ﻿using System;
 
-namespace Lab2
+namespace Geometry
 {
     /// <summary>
-    /// Клас для опису круга.
+    /// Клас, що описує пряму виду a1 * x + a2 * y + a0 = 0
     /// </summary>
-    public class Circle
+    public class Line
     {
-        private (double x, double y) center; // Координати центру круга
-        private double radius; // Радіус круга
+        protected double A0, A1, A2;
 
         /// <summary>
-        /// Властивість для доступу до центру круга.
+        /// Метод для задання коефіцієнтів прямої.
         /// </summary>
-        public (double x, double y) Center
+        public void SetCoefficients(double a0, double a1, double a2)
         {
-            get => center;
-            set => center = value;
+            A0 = a0;
+            A1 = a1;
+            A2 = a2;
         }
 
         /// <summary>
-        /// Властивість для доступу до радіуса круга.
+        /// Метод для виведення коефіцієнтів прямої.
         /// </summary>
-        public double Radius
+        public void DisplayCoefficients()
         {
-            get => radius;
-            set
-            {
-                if (value <= 0)
-                    throw new ArgumentException("Радіус повинен бути більшим за 0");
-                radius = value;
-            }
+            Console.WriteLine($"Пряма: {A1} * x + {A2} * y + {A0} = 0");
         }
 
         /// <summary>
-        /// Конструктор із параметрами.
+        /// Метод для перевірки, чи належить точка прямій.
         /// </summary>
-        /// <param name="center">Координати центру круга.</param>
-        /// <param name="radius">Радіус круга.</param>
-        public Circle((double x, double y) center, double radius)
+        public bool IsPointOnLine(double x, double y)
         {
-            Center = center;
-            Radius = radius;
+            return Math.Abs(A1 * x + A2 * y + A0) < 1e-9;
+        }
+    }
+
+    /// <summary>
+    /// Клас, що описує гіперплощину у 4-вимірному просторі виду a4*x4 + a3*x3 + a2*x2 + a1*x1 + a0 = 0
+    /// </summary>
+    public class Hyperplane : Line
+    {
+        private double A3, A4;
+
+        /// <summary>
+        /// Метод для задання коефіцієнтів гіперплощини.
+        /// </summary>
+        public void SetCoefficients(double a0, double a1, double a2, double a3, double a4)
+        {
+            base.SetCoefficients(a0, a1, a2); // Виклик методу з базового класу
+            A3 = a3;
+            A4 = a4;
         }
 
         /// <summary>
-        /// Конструктор за замовчуванням.
+        /// Метод для виведення коефіцієнтів гіперплощини.
         /// </summary>
-        public Circle() { }
-
-        /// <summary>
-        /// Метод для введення даних про круг.
-        /// </summary>
-        public void InputData()
+        public new void DisplayCoefficients()
         {
-            Console.WriteLine("Введіть координати центру круга:");
-            Center = InputPoint();
-
-            while (true)
-            {
-                try
-                {
-                    Console.Write("Введіть радіус: ");
-                    Radius = Convert.ToDouble(Console.ReadLine());
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Помилка: {ex.Message}. Спробуйте ще раз.");
-                }
-            }
+            Console.WriteLine($"Гіперплощина: {A4} * x4 + {A3} * x3 + {A2} * x2 + {A1} * x1 + {A0} = 0");
         }
 
         /// <summary>
-        /// Метод для введення координат точки.
+        /// Метод для перевірки, чи належить точка гіперплощині.
         /// </summary>
-        /// <returns>Координати точки.</returns>
-        private (double x, double y) InputPoint()
+        public bool IsPointOnHyperplane(double x1, double x2, double x3, double x4)
         {
-            while (true)
-            {
-                try
-                {
-                    Console.Write("x: ");
-                    double x = Convert.ToDouble(Console.ReadLine());
-                    Console.Write("y: ");
-                    double y = Convert.ToDouble(Console.ReadLine());
-                    return (x, y);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Помилка: {ex.Message}. Спробуйте ще раз.");
-                }
-            }
+            return Math.Abs(A4 * x4 + A3 * x3 + A2 * x2 + A1 * x1 + A0) < 1e-9;
         }
-
-        /// <summary>
-        /// Метод для обчислення площі круга.
-        /// </summary>
-        /// <returns>Площа круга.</returns>
-        public double GetArea() => Math.PI * Math.Pow(Radius, 2);
     }
 
     /// <summary>
@@ -107,20 +75,41 @@ namespace Lab2
     /// </summary>
     class Program
     {
-        static void Main()
+        static void Main(string[] args)
         {
-            try
-            {
-                Circle circle = new Circle();
-                circle.InputData();
+            // Створення об'єкта класу "Пряма"
+            Line line = new Line();
+            line.SetCoefficients(-5, 2, 3); // Задання коефіцієнтів для прямої
+            line.DisplayCoefficients();
 
-                double area = circle.GetArea();
-                Console.WriteLine($"Площа круга: {area:F2}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Помилка: {ex.Message}");
-            }
+            Console.WriteLine("Введіть точку (x, y), щоб перевірити, чи належить вона прямій:");
+            Console.Write("x: ");
+            double x = Convert.ToDouble(Console.ReadLine());
+            Console.Write("y: ");
+            double y = Convert.ToDouble(Console.ReadLine());
+
+            Console.WriteLine(line.IsPointOnLine(x, y)
+                ? "Точка належить прямій."
+                : "Точка не належить прямій.");
+
+            // Створення об'єкта класу "Гіперплощина"
+            Hyperplane hyperplane = new Hyperplane();
+            hyperplane.SetCoefficients(1, -2, 3, 4, -5); // Задання коефіцієнтів для гіперплощини
+            hyperplane.DisplayCoefficients();
+
+            Console.WriteLine("Введіть точку (x1, x2, x3, x4), щоб перевірити, чи належить вона гіперплощині:");
+            Console.Write("x1: ");
+            double x1 = Convert.ToDouble(Console.ReadLine());
+            Console.Write("x2: ");
+            double x2 = Convert.ToDouble(Console.ReadLine());
+            Console.Write("x3: ");
+            double x3 = Convert.ToDouble(Console.ReadLine());
+            Console.Write("x4: ");
+            double x4 = Convert.ToDouble(Console.ReadLine());
+
+            Console.WriteLine(hyperplane.IsPointOnHyperplane(x1, x2, x3, x4)
+                ? "Точка належить гіперплощині."
+                : "Точка не належить гіперплощині.");
         }
     }
 }
